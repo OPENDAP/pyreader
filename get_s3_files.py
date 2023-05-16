@@ -40,7 +40,7 @@ def get_file_list(prefix):
     for element in keys:
         e = element.firstChild.nodeValue
         # print(e)
-        r = re.compile('.*\.dmrpp')
+        r = re.compile('.*\.h5$')
         if r.match(e):
             full_url = s3_url + e
             # print(full_url)
