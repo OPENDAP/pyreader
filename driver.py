@@ -59,7 +59,11 @@ def main():
             pattern = "https:.*\/(.*\.h5)"
             match = re.search(pattern, s3_url)
             filename = match.group(1)
+
+            print("filename: " + filename)
             bescmd_filename = create_bescmd(s3_url, filename)
+            print("bescmd file: " + bescmd_filename)
+
             datafile = open("results/" + filename + ".dap", "w+")
             logfile = open("results/" + filename + ".log", "w+")
             result = subprocess.run(["besstandalone", " -c bes.conf", f" -i {bescmd_filename}"],
