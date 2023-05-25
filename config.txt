@@ -1,0 +1,4 @@
+
+[besstandalone]
+path_build = /home/slloyd/git/hyrax_cmake/build/bin
+path_deps = /home/slloyd/git/hyrax_cmake/build/deps/bin

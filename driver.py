@@ -5,6 +5,7 @@ import regex as re
 import subprocess
 import os
 import time
+import configparser
 
 
 class TestResult:
@@ -35,6 +36,19 @@ doc_template = """<?xml version="1.0" encoding="UTF-8"?>
 """
 
 
+def load_config():
+    parser = configparser.RawConfigParser()
+    configfilepath = r'config.txt'
+    parser.read(configfilepath)
+    build_path = parser.get("besstandalone", "path_build")
+    deps_path = parser.get("besstandalone", "path_deps")
+    print("config : " + build_path)
+    print("config : " + deps_path)
+    os.environ["PATH"] += os.pathsep + os.pathsep.join([build_path])
+    os.environ["PATH"] += os.pathsep + os.pathsep.join([deps_path])
+    print("PATH : " + os.environ["PATH"])
+
+
 def read_prefix_config():
     # Using readlines()
     file1 = open('prefixs.txt', 'r')
@@ -51,14 +65,15 @@ def read_prefix_config():
     return prefixes
 
 
-def create_bescmd(url, filename):
+def create_bescmd(url, filename, prefix):
     bescmd = doc_template.replace("URL_TEMPLATE", url)
     root = minidom.parseString(bescmd)
     # print(root.toprettyxml())
     xml_str = root.toprettyxml(indent="\t", encoding="UTF-8")
-    save_path_file = "./bescmds/"+filename+".bescmd"
+    save_path_file = "./bescmds/" + prefix + "-" + filename + ".bescmd"
     with open(save_path_file, "w+b") as f:
         f.write(xml_str)
+    f.close()
     return save_path_file
 
 
@@ -72,7 +87,7 @@ def check_data_file(tr):
                 tr.code = 500
                 msg = match.group(1).strip()
                 tr.message = msg
-                print(msg)
+                # print(msg)
                 subpattern = "HTTP status of (\d{3}) which means (.*)"
                 submatch = re.search(subpattern, msg)
                 if submatch:
@@ -100,13 +115,13 @@ def check_log_file(tr):
         return tr
 
 
-def call_s3_reader(filename, bescmd_filename):
+def call_s3_reader(filename, bescmd_filename, prefix):
     tr = TestResult("pass", 200)
 
-    datafile_name = "results/" + filename + ".dap"
+    datafile_name = "results/" + prefix + "-" + filename + ".dap"
     tr.datafile_name = datafile_name
 
-    logfile_name = "results/" + filename + ".log"
+    logfile_name = "results/" + prefix + "-" + filename + ".log"
     tr.logfile_name = logfile_name
 
     datafile = open(datafile_name, "w+")
@@ -115,12 +130,12 @@ def call_s3_reader(filename, bescmd_filename):
         run_result = subprocess.run(["besstandalone", "--config=bes.conf", f"--inputfile={bescmd_filename}"],
                                 stdout=datafile, stderr=logfile)
         if run_result.returncode != 0:
-            print(f"Error running besstandalone : {run_result.args}")
+            print(f" Error running besstandalone : {run_result.args}")
             tr.status = "error"
             tr.code = 500
             tr.message = str(run_result)
     except Exception as e:
-        print(f"Error running besstandalone : {e}")
+        print(f" Error running besstandalone : {e}")
         tr.status = "error"
         tr.code = 666
         tr.message = str(e)
@@ -131,7 +146,7 @@ def call_s3_reader(filename, bescmd_filename):
     return tr
 
 
-def print_out_testResult(tr):
+def print_out_test_result(tr):
     print("     Status : " + tr.status)
     print("     Code : " + str(tr.code))
     print("     Message : " + tr.message)
@@ -185,6 +200,7 @@ def write_xml_document(prefix, version, results):
     save_path_file = "xml/" + prefix + time.strftime("-%m.%d.%Y-") + version + ".xml"
     with open(save_path_file, "w") as f:
         f.write(xml_str)
+    f.close()
 
 
 def create_attribute(root, result):
@@ -197,53 +213,55 @@ def create_attribute(root, result):
 
 def main():
     import argparse  # for parsing arguments
+    parser = argparse.ArgumentParser(description="Query S3 bucket for a list of *.h5 files, create *.bescmd files,"
+                                                 " call besstandalone with the *.bescmd, save the response to a file,"
+                                                 " finally check the response file and save results to xml file")
+    parser.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true", default=False)
+    parser.add_argument("-V", "--version", help="increase output verbosity", default="1")
+    args = parser.parse_args()
+
+    global verbose
+    verbose = args.verbose
+
+    load_config()
     prefixes = read_prefix_config()
     for prefix in prefixes:
         prefix_list = {}
+        print("\n|-|-|-|-|-|-|-|-|-|- " + prefix + " -|-|-|-|-|-|-|-|-|-|\n") if verbose else ''
+        print("calling 'get_s3_files.get_file_list(...)'") if verbose else ''
         s3_list = get_s3_files.get_file_list(prefix)
-        print("\n|-|-|-|-|-|-|-|-|-|- " + prefix + " -|-|-|-|-|-|-|-|-|-|\n")
-        # print(s3_list)
         for s3_url in s3_list:
             pattern = "https:.*\/(.*\.h5)"
             match = re.search(pattern, s3_url)
             filename = match.group(1)
 
-            print("|---------- filename: " + filename + " ----------|")
-            bescmd_filename = create_bescmd(s3_url, filename)
-            # print("bescmd file: " + bescmd_filename)
+            print("|---------- filename: " + filename + " ----------|") if verbose else print('.', end="", flush=True)
+            print("calling 'create_bescmd(...)'") if verbose else ''
+            bescmd_filename = create_bescmd(s3_url, filename, prefix)
+            print("     bescmd file: " + bescmd_filename) if verbose else ''
 
-            print("calling 'call_s3_reader(...)'")
-            tr = call_s3_reader(filename, bescmd_filename)
-            if tr.status == "error":
-                tr = check_log_file(tr)
-                print_out_testResult(tr)
-                prefix_list[s3_url] = tr
-                print("|____________________ end ____________________|\n")
-                continue
-            print_out_testResult(tr)
-            print("--")
+            print("calling 'call_s3_reader(...)'") if verbose else ''
+            tr = call_s3_reader(filename, bescmd_filename, prefix)
+            if verbose:
+                print_out_test_result(tr)
 
-            print("calling 'check_data_file(...)'")
-            tr = check_data_file(tr)
-            if tr.status == "fail":
-                tr = check_log_file(tr)
-                print_out_testResult(tr)
-                prefix_list[s3_url] = tr
-                print("|____________________ end ____________________|\n")
-                continue
-            print_out_testResult(tr)
-            print("--")
+            print("calling 'check_data_file(...)'") if verbose else ''
+            if tr.status == 'pass':
+                tr = check_data_file(tr)
+            if verbose:
+                print_out_test_result(tr)
 
-            print("calling 'check_log_file(...)'")
+            print("calling 'check_log_file(...)'") if verbose else ''
             tr = check_log_file(tr)
-            print_out_testResult(tr)
-            print("--")
+            if verbose:
+                print_out_test_result(tr)
 
             prefix_list[s3_url] = tr
 
-            print("|____________________ end ____________________|\n")
-        print(prefix_list)
+            print("|____________________ end ____________________|\n") if verbose else ''
         write_xml_document(prefix, "1", prefix_list)
+        print("\n|-|-|-|-|-|-|-|-|-|-|-|-|-|- end -|-|-|-|-|-|-|-|-|-|-|-|-|-|\n") if verbose \
+            else print('|', end="", flush=True)
 
 
 if __name__ == "__main__":
