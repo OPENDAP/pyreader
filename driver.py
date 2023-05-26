@@ -7,6 +7,8 @@ import os
 import time
 import configparser
 
+verbose: bool = False
+
 
 class TestResult:
     def __init__(self, status, code):
@@ -42,11 +44,24 @@ def load_config():
     parser.read(configfilepath)
     build_path = parser.get("besstandalone", "path_build")
     deps_path = parser.get("besstandalone", "path_deps")
-    print("config : " + build_path)
-    print("config : " + deps_path)
+    print("config : " + build_path) if verbose else ''
+    print("config : " + deps_path) if verbose else ''
     os.environ["PATH"] += os.pathsep + os.pathsep.join([build_path])
     os.environ["PATH"] += os.pathsep + os.pathsep.join([deps_path])
-    print("PATH : " + os.environ["PATH"])
+    # print("PATH : " + os.environ["PATH"])
+
+
+def check_besstandalone():
+    success = 0
+    try:
+        run_result = subprocess.run(["besstandalone", "--version"])
+        if run_result.returncode != 0:
+            print(f" Error running besstandalone : {run_result.args}") if verbose else ''
+            success = 1
+    except Exception as e:
+        print("besstandalone unreachable, load config.txt") if verbose else ''
+        success = 1
+    return success
 
 
 def read_prefix_config():
@@ -223,7 +238,10 @@ def main():
     global verbose
     verbose = args.verbose
 
-    load_config()
+    bes_run = check_besstandalone()
+    if bes_run == 1:
+        load_config()
+
     prefixes = read_prefix_config()
     for prefix in prefixes:
         prefix_list = {}
