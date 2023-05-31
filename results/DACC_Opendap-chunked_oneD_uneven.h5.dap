@@ -1,7 +1,0 @@
-BESError
-    Type: 3
-    Message: BES.Catalog.catalog.RootDirectory not defined in BES configuration file
-    Administrator: support@opendap.org
-    Location
-        File: BESCatalogUtils.cc
-        Line: 91
