@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<?xml-stylesheet type='text/xsl' href='pyreader_details.xsl'?>
+<DACC date="Fri May 26 14:10:24 2023" name="DACC_Opendap">
+	<File name="chunked_oneD_uneven.h5" url="https://s3-module-test-bucket.s3.us-west-2.amazonaws.com/DACC_Opendap/chunked_oneD_uneven.h5">
+		<Result code="500" message="BES.Catalog.catalog.RootDirectory not defined in BES configuration file" status="fail"/>
+	</File>
+	<File name="chunked_threeD.h5" url="https://s3-module-test-bucket.s3.us-west-2.amazonaws.com/DACC_Opendap/chunked_threeD.h5">
+		<Result code="500" message="BES.Catalog.catalog.RootDirectory not defined in BES configuration file" status="fail"/>
+	</File>
+</DACC>

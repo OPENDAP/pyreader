@@ -1,0 +1,16 @@
+<?xml version="1.0" ?>
+<?xml-stylesheet type='text/xsl' href='pyreader_details.xsl'?>
+<DACC date="Fri May 26 14:10:23 2023" name="test_folder">
+	<File name="chunked_fourD.h5" url="https://s3-module-test-bucket.s3.us-west-2.amazonaws.com/test_folder/chunked_fourD.h5">
+		<Result code="500" message="BES.Catalog.catalog.RootDirectory not defined in BES configuration file" status="fail"/>
+	</File>
+	<File name="chunked_oneD.h5" url="https://s3-module-test-bucket.s3.us-west-2.amazonaws.com/test_folder/chunked_oneD.h5">
+		<Result code="500" message="BES.Catalog.catalog.RootDirectory not defined in BES configuration file" status="fail"/>
+	</File>
+	<File name="d_int.h5" url="https://s3-module-test-bucket.s3.us-west-2.amazonaws.com/test_folder/d_int.h5">
+		<Result code="500" message="BES.Catalog.catalog.RootDirectory not defined in BES configuration file" status="fail"/>
+	</File>
+	<File name="d_int_v2.h5" url="https://s3-module-test-bucket.s3.us-west-2.amazonaws.com/test_folder/d_int_v2.h5">
+		<Result code="500" message="BES.Catalog.catalog.RootDirectory not defined in BES configuration file" status="fail"/>
+	</File>
+</DACC>
