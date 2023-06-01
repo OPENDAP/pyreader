@@ -27,8 +27,10 @@ the change worked, run 'docker run hello-world' as a non-root user.
 
 ### Start the container
 Use the command `docker run` with the options:
-    -d -h besd -p 10022:10022 --name besd \
-    -v /home/centos/pyreader:/user/share/pyreader:Z \
+```bash
+-d -h besd -p 10022:10022 --name besd \
+-v /home/centos/pyreader:/user/share/pyreader:Z \
+```
 Where -d will run the container as detached, -h sets the hostname, -p
 will 'publish' a TCP port from the container to the host, --name
 provides a name that can be used to refere to the running container
