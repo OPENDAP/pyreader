@@ -37,7 +37,9 @@ provides a name that can be used to refere to the running container
 from other Docker commands, -v maps a directory on the host computer
 to a directory inside the container. The special ':Z' on SE (security
 enhanced) Linux will cause Docker to effectively run
-    `chcon -Rt svirt_sandbox_file_t /usr/share/pyreader`
+```bash
+chcon -Rt svirt_sandbox_file_t /usr/share/pyreader
+```
 which means that the container can access the mapped host directory
 without extra work given that the host is using SE Linux.
 
@@ -66,9 +68,10 @@ not in a specific region, but when am AWS 'signature' is formed, the
 region is part of the signature, so we need to know it.
 
 For pyreader these two env vars should now (5/31/23) be set to:
+```bash
     CMAC_URL=https://s3... (I forget right now - TODO)
     CMAC_REGION=us-west-2
-
+```
 The CMAC_ID is the AWS_ACCESS_KEY_ID and CMAC_ACCESS_KEY is the
 AWS_SECRET_ACCESS_KEY.
 
@@ -82,10 +85,12 @@ command. The options -it say to run the program as interactive and
 using a tty. A series of -e (aka --env) options are used to pass
 various environment variables into the contaiiner. For this command,
 these should be:
+```bash
     --env CMAC_URL=https://s3... TODO \
     --env CMAC_REGION=us-west-2 \
     --env CMAC_ID=$AWS_ACCESS_KEY_ID \
     --env CMAC_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+```
 Where the $AWS... env vars are set in the host's environment.
 
 Because we mapped /home/centos/pyreader on the host computer to
