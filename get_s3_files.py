@@ -20,8 +20,8 @@ def build_creds():
     return auth
 
 
-def get_file_list(prefix):
-    s3_url = "https://s3-module-test-bucket.s3.us-west-2.amazonaws.com/"
+def get_file_list(prefix, s3_url):
+    # s3_url = "https://s3-module-test-bucket.s3.us-west-2.amazonaws.com/"
     # resp = requests.get(s3_url, auth=auth, params=param)
     auth = build_creds()
     if prefix != '':

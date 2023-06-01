@@ -10,6 +10,7 @@ import configparser
 verbose: bool = False
 version = 1
 bes_conf = ''
+s3_url = ''
 
 
 class TestResult:
@@ -56,7 +57,11 @@ def load_config(bes_run):
 
     global bes_conf
     bes_conf = parser.get("besconf", "path")
-    print("     bes.conf path: "+bes_conf) if verbose else ''
+    print("     bes.conf path: " + bes_conf) if verbose else ''
+
+    global s3_url
+    s3_url = parser.get("s3url", "url")
+    print("     s3 url: " + s3_url) if verbose else ''
 
 
 def check_besstandalone():
@@ -76,6 +81,7 @@ def read_prefix_config():
     # Using readlines()
     file1 = open('prefixs.txt', 'r')
     raw_prefixes = file1.readlines()
+    file1.close()
     prefixes = []
     count = 0
 
@@ -94,6 +100,7 @@ def create_bescmd(url, filename, prefix):
     # print(root.toprettyxml())
     xml_str = root.toprettyxml(indent="\t", encoding="UTF-8")
     save_path_file = "./bescmds/" + prefix + "-" + filename + ".bescmd"
+    # print(xml_str)
     with open(save_path_file, "w+b") as f:
         f.write(xml_str)
     f.close()
@@ -151,7 +158,7 @@ def call_s3_reader(filename, bescmd_filename, prefix):
     logfile = open(logfile_name, "w+")
     try:
         run_result = subprocess.run(["besstandalone", f"--config={bes_conf}", f"--inputfile={bescmd_filename}"],
-                                stdout=datafile, stderr=logfile)
+                                    stdout=datafile, stderr=logfile)
         if run_result.returncode != 0:
             print(f"    /!\\ Error running besstandalone : {run_result.args}")
             tr.status = "error"
@@ -177,7 +184,7 @@ def print_out_test_result(tr):
     print("     log payload : " + tr.log_payload)
 
 
-def write_xml_document(prefix, version, results):
+def write_xml_document(prefix, ver, results):
     # make the response document
     root = minidom.Document()
 
@@ -191,7 +198,7 @@ def write_xml_document(prefix, version, results):
     root.appendChild(prov)
 
     for key in results.keys():
-        url = key;
+        url = key
         pattern = "https:.*\/(.*\.h5)"
         match = re.search(pattern, url)
         filename = match.group(1)
@@ -203,7 +210,7 @@ def write_xml_document(prefix, version, results):
         prov.appendChild(collection)
 
         # Add XML for all the tests we ran
-        test_result = results[key];
+        test_result = results[key]
 
         test = create_attribute(root, test_result)
         collection.appendChild(test)
@@ -220,7 +227,7 @@ def write_xml_document(prefix, version, results):
 
     # Save the XML
     xml_str = root.toprettyxml(indent="\t")
-    save_path_file = "xml/" + prefix + time.strftime("-%m.%d.%Y-") + version + ".xml"
+    save_path_file = "xml/" + prefix + time.strftime("-%m.%d.%Y-") + ver + ".xml"
     with open(save_path_file, "w") as f:
         f.write(xml_str)
     f.close()
@@ -251,13 +258,24 @@ def main():
     bes_run = check_besstandalone()
     load_config(bes_run)
 
+    global s3_url
+    url = s3_url
+
     prefixes = read_prefix_config()
     for prefix in prefixes:
+        if prefix[0] == '#':
+            continue
+
         prefix_list = {}
         print("\n|-|-|-|-|-|-|-|-|-|- " + prefix + " -|-|-|-|-|-|-|-|-|-|\n") if verbose else ''
         print("calling 'get_s3_files.get_file_list(...)'") if verbose else ''
-        s3_list = get_s3_files.get_file_list(prefix)
+        s3_list = get_s3_files.get_file_list(prefix, url)
         print("     # of files found: " + str(len(s3_list))) if verbose else ''
+
+        if len(s3_list) == 0:
+            tr = TestResult("pass", 200)
+            tr.log_payload = "No files found in \"" + prefix + "\" S3 bucket."
+            prefix_list["https:foo/Empty Bucket.h5"] = tr
 
         for s3_url in s3_list:
             pattern = "https:.*\/(.*\.h5)"
@@ -295,3 +313,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
