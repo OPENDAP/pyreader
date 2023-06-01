@@ -10,7 +10,7 @@ else
     exit 1
 fi
 
-docker exec --interactive --tty \
+docker exec \
 --env CMAC_URL=https://s3-module-test-bucket.s3.us-west-2.amazonaws.com/ \
 --env CMAC_REGION=us-west-2 \
 --env CMAC_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY \
