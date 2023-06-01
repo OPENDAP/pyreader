@@ -8,6 +8,8 @@ import time
 import configparser
 
 verbose: bool = False
+version = 1
+bes_conf = ''
 
 
 class TestResult:
@@ -38,17 +40,23 @@ doc_template = """<?xml version="1.0" encoding="UTF-8"?>
 """
 
 
-def load_config():
+def load_config(bes_run):
     parser = configparser.RawConfigParser()
     configfilepath = r'config.txt'
     parser.read(configfilepath)
-    build_path = parser.get("besstandalone", "path_build")
-    deps_path = parser.get("besstandalone", "path_deps")
-    print("config : " + build_path) if verbose else ''
-    print("config : " + deps_path) if verbose else ''
-    os.environ["PATH"] += os.pathsep + os.pathsep.join([build_path])
-    os.environ["PATH"] += os.pathsep + os.pathsep.join([deps_path])
-    # print("PATH : " + os.environ["PATH"])
+
+    if bes_run == 1:
+        build_path = parser.get("besstandalone", "path_build")
+        deps_path = parser.get("besstandalone", "path_deps")
+        print("     config : " + build_path) if verbose else ''
+        print("     config : " + deps_path) if verbose else ''
+        os.environ["PATH"] += os.pathsep + os.pathsep.join([build_path])
+        os.environ["PATH"] += os.pathsep + os.pathsep.join([deps_path])
+        # print("PATH : " + os.environ["PATH"])
+
+    global bes_conf
+    bes_conf = parser.get("besconf", "path")
+    print("     bes.conf path: "+bes_conf) if verbose else ''
 
 
 def check_besstandalone():
@@ -56,10 +64,10 @@ def check_besstandalone():
     try:
         run_result = subprocess.run(["besstandalone", "--version"])
         if run_result.returncode != 0:
-            print(f" Error running besstandalone : {run_result.args}") if verbose else ''
+            print(f"    /!\\ Error running besstandalone : {run_result.args}") if verbose else ''
             success = 1
     except Exception as e:
-        print("besstandalone unreachable, load config.txt") if verbose else ''
+        print("    /!\\ besstandalone unreachable, load config.txt") if verbose else ''
         success = 1
     return success
 
@@ -142,15 +150,15 @@ def call_s3_reader(filename, bescmd_filename, prefix):
     datafile = open(datafile_name, "w+")
     logfile = open(logfile_name, "w+")
     try:
-        run_result = subprocess.run(["besstandalone", "--config=bes.conf", f"--inputfile={bescmd_filename}"],
+        run_result = subprocess.run(["besstandalone", f"--config={bes_conf}", f"--inputfile={bescmd_filename}"],
                                 stdout=datafile, stderr=logfile)
         if run_result.returncode != 0:
-            print(f" Error running besstandalone : {run_result.args}")
+            print(f"    /!\\ Error running besstandalone : {run_result.args}")
             tr.status = "error"
             tr.code = 500
             tr.message = str(run_result)
     except Exception as e:
-        print(f" Error running besstandalone : {e}")
+        print(f"    /!\\ Error running besstandalone : {e}")
         tr.status = "error"
         tr.code = 666
         tr.message = str(e)
@@ -237,10 +245,11 @@ def main():
 
     global verbose
     verbose = args.verbose
+    global version
+    version = args.version
 
     bes_run = check_besstandalone()
-    if bes_run == 1:
-        load_config()
+    load_config(bes_run)
 
     prefixes = read_prefix_config()
     for prefix in prefixes:
@@ -248,6 +257,8 @@ def main():
         print("\n|-|-|-|-|-|-|-|-|-|- " + prefix + " -|-|-|-|-|-|-|-|-|-|\n") if verbose else ''
         print("calling 'get_s3_files.get_file_list(...)'") if verbose else ''
         s3_list = get_s3_files.get_file_list(prefix)
+        print("     # of files found: " + str(len(s3_list))) if verbose else ''
+
         for s3_url in s3_list:
             pattern = "https:.*\/(.*\.h5)"
             match = re.search(pattern, s3_url)
@@ -277,7 +288,7 @@ def main():
             prefix_list[s3_url] = tr
 
             print("|____________________ end ____________________|\n") if verbose else ''
-        write_xml_document(prefix, "1", prefix_list)
+        write_xml_document(prefix, str(version), prefix_list)
         print("\n|-|-|-|-|-|-|-|-|-|-|-|-|-|- end -|-|-|-|-|-|-|-|-|-|-|-|-|-|\n") if verbose \
             else print('|', end="", flush=True)
 

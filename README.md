@@ -6,9 +6,6 @@ installation:
 - python3 ./get-pip.py
 - pip install aws-requests-auth
 - pip install regex
-or 
-- pip-safe install aws-requests-auth
-- pip-safe install regex
 
 ## Running besstandalone using the Docker container build
 Summary: Configure Docker so it can be used by a non-root user, if
