@@ -69,8 +69,8 @@ region is part of the signature, so we need to know it.
 
 For pyreader these two env vars should now (5/31/23) be set to:
 ```bash
-    CMAC_URL=https://s3... (I forget right now - TODO)
-    CMAC_REGION=us-west-2
+CMAC_URL=https://s3-module-test-bucket.s3.us-west-2.amazonaws.com/ \
+CMAC_REGION=us-west-2
 ```
 The CMAC_ID is the AWS_ACCESS_KEY_ID and CMAC_ACCESS_KEY is the
 AWS_SECRET_ACCESS_KEY.
@@ -86,10 +86,10 @@ using a tty. A series of -e (aka --env) options are used to pass
 various environment variables into the contaiiner. For this command,
 these should be:
 ```bash
-    --env CMAC_URL=https://s3... TODO \
-    --env CMAC_REGION=us-west-2 \
-    --env CMAC_ID=$AWS_ACCESS_KEY_ID \
-    --env CMAC_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+--env CMAC_URL=s3-module-test-bucket.s3.us-west-2.amazonaws.com/ \
+--env CMAC_REGION=us-west-2 \
+--env CMAC_ID=$AWS_ACCESS_KEY_ID \
+--env CMAC_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
 ```
 Where the $AWS... env vars are set in the host's environment.
 
