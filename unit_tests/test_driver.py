@@ -20,14 +20,14 @@ class DriverTests(unittest.TestCase):
     def test_create_bescmd(self):
         bescmd_path = driver.create_bescmd("https://test_url/", "test_file", "unittest")
         # print(bescmd_path)
-        baseline_path = "./bescmds/baseline.bescmd"
+        baseline_path = "./unit_tests/baselines/baseline.bescmd"
         result = filecmp.cmp(bescmd_path, baseline_path, shallow=False)
         # print(result)
         self.assertEqual(True, result)
 
     def test_check_data_files(self):
         tr = driver.TestResult("pass", 200)
-        tr.datafile_name = "./results/baseline.dap"
+        tr.datafile_name = "./unit_tests/baselines/baseline.dap"
         tr = driver.check_data_file(tr)
         self.assertEqual(tr.status, "fail")
         self.assertEqual(tr.code, '404')
@@ -35,14 +35,14 @@ class DriverTests(unittest.TestCase):
 
     def test_check_log_file(self):
         tr = driver.TestResult("fail", 500)
-        tr.logfile_name = "./results/baseline.log"
+        tr.logfile_name = "./unit_tests/baselines/baseline.log"
         tr = driver.check_log_file(tr)
         self.assertEqual(tr.log_payload, "this is the baseline.log text")
 
     def test_call_s3_reader(self):
         driver.load_config(1)
-        tr = driver.call_s3_reader("s3_test", "./bescmds/s3_test.bescmd", "unittest")
-        s3_baseline = "./results/s3_baseline.dap"
+        tr = driver.call_s3_reader("s3_test", "./unit_tests/baselines/s3_test.bescmd", "unittest")
+        s3_baseline = "./unit_tests/baselines/s3_baseline.dap"
         result = filecmp.cmp(tr.datafile_name, s3_baseline, shallow=False)
         self.assertEqual(result, True)
 
@@ -61,7 +61,7 @@ class DriverTests(unittest.TestCase):
         xml_file.write(xml_string)
         xml_file.close()
 
-        result = filecmp.cmp(save_path_file, "xml/baseline.xml", shallow=False)
+        result = filecmp.cmp(save_path_file, "./unit_tests/baselines/baseline.xml", shallow=False)
         self.assertEqual(result, True)
 
 
