@@ -1,0 +1,10 @@
+<?xml version="1.0" ?>
+<?xml-stylesheet type='text/xsl' href='pyreader_details.xsl'?>
+<DACC name="unittest" date="date">
+	<File name="test_entry_1.h5" url="https:unittest/test_entry_1.h5">
+		<Result status="pass" code="200" message="NA"/>
+	</File>
+	<File name="test_entry_2.h5" url="https:unittest/test_entry_2.h5">
+		<Result status="fail" code="500" message="NA"/>
+	</File>
+</DACC>
