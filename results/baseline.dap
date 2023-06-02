@@ -1,0 +1,7 @@
+BESError
+    Type: 5
+    Message: ERROR - The HTTP GET request for the source URL: https://s3-module-test-bucket.s3.us-west-2.amazonaws.com/test_folder/chunked_oneD.h5.dmrpp FAILED. CURLINFO_EFFECTIVE_URL: https://s3-module-test-bucket.s3.us-west-2.amazonaws.com/test_folder/chunked_oneD.h5.dmrpp The response had an HTTP status of 404 which means Not Found: The underlying data source or server could not be found.
+    Administrator: support@opendap.org
+    Location
+        File: CurlUtils.cc
+        Line: 836
