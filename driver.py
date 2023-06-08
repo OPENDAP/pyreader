@@ -163,7 +163,7 @@ def call_s3_reader(filename, bescmd_filename, prefix):
             password = os.environ.get('CMAC_ACCESS_KEY')
             region = os.getenv('CMAC_REGION')
             url = os.getenv('CMAC_URL')
-            run_result = subprocess.run(["exec",
+            run_result = subprocess.run(["docker", "exec",
                                          "--env", f"CMAC_URL={url}",
                                          "--env", f"CMAC_REGION={region}",
                                          "--env", f"CMAC_ACCESS_KEY={password}",
