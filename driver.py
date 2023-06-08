@@ -10,6 +10,7 @@ import configparser
 verbose: bool = False
 version = 1
 bes_conf = ''
+src_dir = ''
 s3_url = ''
 docker: bool = False
 
@@ -56,6 +57,10 @@ def load_config(bes_run):
         os.environ["PATH"] += os.pathsep + os.pathsep.join([deps_path])
         # print("PATH : " + os.environ["PATH"])
 
+    global src_dir
+    src_dir = parser.get("besconf", "dir")
+    print("     src dir: " + src_dir) if verbose else ''
+
     global bes_conf
     bes_conf = parser.get("besconf", "path")
     print("     bes.conf path: " + bes_conf) if verbose else ''
@@ -100,7 +105,7 @@ def create_bescmd(url, filename, prefix):
     root = minidom.parseString(bescmd)
     # print(root.toprettyxml())
     xml_str = root.toprettyxml(indent="\t", encoding="UTF-8")
-    save_path_file = "./bescmds/" + prefix + "-" + filename + ".bescmd"
+    save_path_file = "bescmds/" + prefix + "-" + filename + ".bescmd"
     # print(xml_str)
     with open(save_path_file, "w+b") as f:
         f.write(xml_str)
@@ -169,8 +174,8 @@ def call_s3_reader(filename, bescmd_filename, prefix):
                                          "--env", f"CMAC_ACCESS_KEY={password}",
                                          "--env", f"CMAC_ID={user}",
                                          "besd", "besstandalone",
-                                         f"--config={bes_conf}",
-                                         f"--inputfile={bescmd_filename}"],
+                                         f"--config={src_dir + bes_conf}",
+                                         f"--inputfile={src_dir + bescmd_filename}"],
                                         stdout=datafile, stderr=logfile)
             if run_result.returncode != 0:
                 print(f"    /!\\ Error running docker : {run_result.args}")
@@ -184,7 +189,7 @@ def call_s3_reader(filename, bescmd_filename, prefix):
             tr.message = str(e)
     else:
         try:
-            run_result = subprocess.run(["besstandalone", f"--config={bes_conf}", f"--inputfile={bescmd_filename}"],
+            run_result = subprocess.run(["besstandalone", f"--config={src_dir + bes_conf}", f"--inputfile={src_dir + bescmd_filename}"],
                                         stdout=datafile, stderr=logfile)
             if run_result.returncode != 0:
                 print(f"    /!\\ Error running besstandalone : {run_result.args}")
