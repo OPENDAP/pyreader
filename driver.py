@@ -11,6 +11,7 @@ verbose: bool = False
 version = 1
 bes_conf = ''
 s3_url = ''
+docker: bool = False
 
 
 class TestResult:
@@ -156,19 +157,45 @@ def call_s3_reader(filename, bescmd_filename, prefix):
 
     datafile = open(datafile_name, "w+")
     logfile = open(logfile_name, "w+")
-    try:
-        run_result = subprocess.run(["besstandalone", f"--config={bes_conf}", f"--inputfile={bescmd_filename}"],
-                                    stdout=datafile, stderr=logfile)
-        if run_result.returncode != 0:
-            print(f"    /!\\ Error running besstandalone : {run_result.args}")
+    if docker:
+        try:
+            user = os.getenv('CMAC_ID')
+            password = os.environ.get('CMAC_ACCESS_KEY')
+            region = os.getenv('CMAC_REGION')
+            url = os.getenv('CMAC_URL')
+            run_result = subprocess.run(["exec",
+                                         "--env", f"CMAC_URL={url}",
+                                         "--env", f"CMAC_REGION={region}",
+                                         "--env", f"CMAC_ACCESS_KEY={password}",
+                                         "--env", f"CMAC_ID={user}",
+                                         "besd", "besstandalone",
+                                         f"--config={bes_conf}",
+                                         f"--inputfile={bescmd_filename}"],
+                                        stdout=datafile, stderr=logfile)
+            if run_result.returncode != 0:
+                print(f"    /!\\ Error running docker : {run_result.args}")
+                tr.status = "error"
+                tr.code = 500
+                tr.message = str(run_result)
+        except Exception as e:
+            print(f"    /!\\ Error running docker : {e}")
             tr.status = "error"
-            tr.code = 500
-            tr.message = str(run_result)
-    except Exception as e:
-        print(f"    /!\\ Error running besstandalone : {e}")
-        tr.status = "error"
-        tr.code = 666
-        tr.message = str(e)
+            tr.code = 666
+            tr.message = str(e)
+    else:
+        try:
+            run_result = subprocess.run(["besstandalone", f"--config={bes_conf}", f"--inputfile={bescmd_filename}"],
+                                        stdout=datafile, stderr=logfile)
+            if run_result.returncode != 0:
+                print(f"    /!\\ Error running besstandalone : {run_result.args}")
+                tr.status = "error"
+                tr.code = 500
+                tr.message = str(run_result)
+        except Exception as e:
+            print(f"    /!\\ Error running besstandalone : {e}")
+            tr.status = "error"
+            tr.code = 666
+            tr.message = str(e)
 
     logfile.close()
     datafile.close()
@@ -247,13 +274,16 @@ def main():
                                                  " call besstandalone with the *.bescmd, save the response to a file,"
                                                  " finally check the response file and save results to xml file")
     parser.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true", default=False)
-    parser.add_argument("-V", "--version", help="increase output verbosity", default="1")
+    parser.add_argument("-V", "--version", help="version number for output files", default="1")
+    parser.add_argument("-D", "--docker", help="use 'docker exec besd ...' command", default=False)
     args = parser.parse_args()
 
     global verbose
     verbose = args.verbose
     global version
     version = args.version
+    global docker
+    docker = args.docker
 
     bes_run = check_besstandalone()
     load_config(bes_run)
