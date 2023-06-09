@@ -3,12 +3,17 @@ import xml.dom.minidom as minidom
 import regex as re
 import os
 import time
+import shutil
 
 
 class Info:
     def __init__(self, daac, date):
         self.DAAC = daac
         self.date = date
+        path = ''
+        daac_xml = False
+        month_xml = False
+        index_xml = False
 
 
 def get_xml_list():
@@ -19,8 +24,7 @@ def get_xml_list():
         if os.path.isfile(os.path.join(dir_path, path)):
             if re.match(".*\.xml", path) and not re.search("unittest.*\.xml", path):
                 xmls.append(path)
-    # print(xmls)
-    print(xmls[0])
+                
     return xmls
 
 
@@ -36,10 +40,34 @@ def parse_file(name):
     return info
 
 
+def check_dirs(info):
+    www_dir = "/var/www/html/pyreader-tests/"
+    daac_dir = os.path.join(www_dir, info.DAAC)
+    month_dir = os.path.join(daac_dir, info.date)
+
+    if not os.path.exists(daac_dir):
+        os.mkdir(daac_dir)
+        info.daac_xml = True
+
+    if not os.path.exists(month_dir):
+        os.mkdir(month_dir)
+        info.month_xml = True
+
+    info.path = month_dir
+
+
+def move_file(name, info):
+    old_dir = "./xml"
+    shutil.move(os.path.join(old_dir, name), os.path.join(info.path, name))
+
+
 def driver():
     xmls = get_xml_list()
-    info = parse_file(xmls[0])
-    print(info.DAAC + " | " + info.date)
+    for file in xmls:
+        info = parse_file(file)
+        print(info.DAAC + " | " + info.date)
+        check_dirs(info)
+        move_file(file, info)
 
 
 def main():

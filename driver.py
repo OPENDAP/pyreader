@@ -189,7 +189,7 @@ def write_xml_document(prefix, ver, results):
     root = minidom.Document()
 
     xsl_element = root.createProcessingInstruction("xml-stylesheet",
-                                                   "type='text/xsl' href='pyreader_details.xsl'")
+                                                   "type='text/xsl' href='../../pyreader_details.xsl'")
     root.appendChild(xsl_element)
 
     prov = root.createElement('DACC')
