@@ -10,10 +10,7 @@ class Info:
     def __init__(self, daac, date):
         self.DAAC = daac
         self.date = date
-        path = ''
-        daac_xml = False
-        month_xml = False
-        index_xml = False
+        self.path = ''
 
 
 def get_xml_list():
@@ -24,7 +21,7 @@ def get_xml_list():
         if os.path.isfile(os.path.join(dir_path, path)):
             if re.match(".*\.xml", path) and not re.search("unittest.*\.xml", path):
                 xmls.append(path)
-                
+
     return xmls
 
 
@@ -34,7 +31,7 @@ def parse_file(name):
         daac = match.group(1).strip()
         month = match.group(2).strip()
         year = match.group(3).strip()
-        print("DAAC: '" + daac + "' | month/year : '" + month + "/" + year + "'")
+        # print("DAAC: '" + daac + "' | month/year : '" + month + "/" + year + "'")
         date = month + "_" + year
         info = Info(daac, date)
     return info
@@ -47,11 +44,9 @@ def check_dirs(info):
 
     if not os.path.exists(daac_dir):
         os.mkdir(daac_dir)
-        info.daac_xml = True
 
     if not os.path.exists(month_dir):
         os.mkdir(month_dir)
-        info.month_xml = True
 
     info.path = month_dir
 
