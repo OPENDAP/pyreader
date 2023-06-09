@@ -164,15 +164,11 @@ def call_s3_reader(filename, bescmd_filename, prefix):
     logfile = open(logfile_name, "w+")
     if docker:
         try:
-            user = os.getenv('CMAC_ID')
-            password = os.environ.get('CMAC_ACCESS_KEY')
-            region = os.getenv('CMAC_REGION')
-            url = os.getenv('CMAC_URL')
             run_result = subprocess.run(["docker", "exec",
-                                         "--env", f"CMAC_URL={url}",
-                                         "--env", f"CMAC_REGION={region}",
-                                         "--env", f"CMAC_ACCESS_KEY={password}",
-                                         "--env", f"CMAC_ID={user}",
+                                         "--env", f"CMAC_URL",
+                                         "--env", f"CMAC_REGION",
+                                         "--env", f"CMAC_ACCESS_KEY",
+                                         "--env", f"CMAC_ID",
                                          "besd", "besstandalone",
                                          f"--config={src_dir + bes_conf}",
                                          f"--inputfile={src_dir + bescmd_filename}"],
