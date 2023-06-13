@@ -56,18 +56,20 @@ def move_file(name, info):
     shutil.move(os.path.join(old_dir, name), os.path.join(info.path, name))
 
 
-def driver():
+def driver(verbose):
+    print("Moving xml files ...")
     xmls = get_xml_list()
     for file in xmls:
         info = parse_file(file)
-        print(info.DAAC + " | " + info.date)
+        print(info.DAAC + " | " + info.date) if verbose else print('.', end="", flush=True)
         check_dirs(info)
         move_file(file, info)
+    print("")
 
 
 def main():
     # main for testing script
-    driver()
+    driver(True)
 
 
 if __name__ == "__main__":

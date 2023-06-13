@@ -1,11 +1,13 @@
 
-import get_s3_files
 import xml.dom.minidom as minidom
 import regex as re
 import subprocess
 import os
 import time
 import configparser
+
+import get_s3_files
+import relocate_files
 
 verbose: bool = False
 version = 1
@@ -261,6 +263,8 @@ def main():
     global s3_url
     url = s3_url
 
+    print("Beginning tests ...")
+
     prefixes = read_prefix_config()
     for prefix in prefixes:
         if prefix[0] == '#':
@@ -312,6 +316,7 @@ def main():
             else print('|', end="", flush=True)
 
     print("")
+    relocate_files.driver(verbose)
 
 
 if __name__ == "__main__":
