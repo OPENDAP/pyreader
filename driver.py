@@ -1,11 +1,13 @@
 
-import get_s3_files
 import xml.dom.minidom as minidom
 import regex as re
 import subprocess
 import os
 import time
 import configparser
+
+import get_s3_files
+import relocate_files
 
 verbose: bool = False
 version = 1
@@ -75,10 +77,10 @@ def check_besstandalone():
     try:
         run_result = subprocess.run(["besstandalone", "--version"])
         if run_result.returncode != 0:
-            print(f"    /!\\ Error running besstandalone : {run_result.args}") if verbose else ''
+            print(f" /!\\ Error running besstandalone : {run_result.args}") if verbose else ''
             success = 1
     except Exception as e:
-        print("    /!\\ besstandalone unreachable, load config.txt") if verbose else ''
+        print(" /!\\ besstandalone unreachable, load config.txt") if verbose else ''
         success = 1
     return success
 
@@ -217,7 +219,7 @@ def write_xml_document(prefix, ver, results):
     root = minidom.Document()
 
     xsl_element = root.createProcessingInstruction("xml-stylesheet",
-                                                   "type='text/xsl' href='pyreader_details.xsl'")
+                                                   "type='text/xsl' href='../../pyreader_details.xsl'")
     root.appendChild(xsl_element)
 
     prov = root.createElement('DACC')
@@ -292,6 +294,8 @@ def main():
     global s3_url
     url = s3_url
 
+    print("Beginning tests ...")
+
     prefixes = read_prefix_config()
     for prefix in prefixes:
         if prefix[0] == '#':
@@ -307,6 +311,7 @@ def main():
             tr = TestResult("pass", 200)
             tr.log_payload = "No files found in \"" + prefix + "\" S3 bucket."
             prefix_list["https:foo/Empty Bucket.h5"] = tr
+            print("     " + tr.log_payload) if verbose else print('_', end="", flush=True)
 
         for s3_url in s3_list:
             pattern = "https:.*\/(.*\.h5)"
@@ -340,6 +345,9 @@ def main():
         write_xml_document(prefix, str(version), prefix_list)
         print("\n|-|-|-|-|-|-|-|-|-|-|-|-|-|- end -|-|-|-|-|-|-|-|-|-|-|-|-|-|\n") if verbose \
             else print('|', end="", flush=True)
+
+    print("")
+    relocate_files.driver(verbose)
 
 
 if __name__ == "__main__":
