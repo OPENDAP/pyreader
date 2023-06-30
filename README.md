@@ -29,7 +29,7 @@ the change worked, run 'docker run hello-world' as a non-root user.
 Use the command `docker run` with the options:
 ```bash
 -d -h besd -p 10022:10022 --name besd \
--v /home/centos/pyreader:/user/share/pyreader:Z \
+-v /home/centos/pyreader:/usr/share/pyreader:Z \
 ```
 Where -d will run the container as detached, -h sets the hostname, -p
 will 'publish' a TCP port from the container to the host, --name
@@ -42,6 +42,18 @@ chcon -Rt svirt_sandbox_file_t /usr/share/pyreader
 ```
 which means that the container can access the mapped host directory
 without extra work given that the host is using SE Linux.
+
+The full command to start the container on SE linux looks like:
+```bash
+docker run -d -h besd -p 10022:10022 --name besd \
+-v /home/centos/pyreader:/usr/share/pyreader:Z \
+opendap/besd:snapshot
+```
+
+For OSX or Linux with SE Linux features absent/disabled, drop the
+trailing ```:Z``` on the volume mount. If you want the current
+directory to be the host's directory for the /usr/share/pyreader mount
+point, you can use ```$(pwd):/usr/share...```.
 
 ### Testing the running container
 Use 'docker exec -it besd bash' to get a shell running inside the
@@ -92,6 +104,13 @@ these should be:
 --env CMAC_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
 ```
 Where the $AWS... env vars are set in the host's environment.
+
+OR
+
+If you have the env vars CMAC\_URL, ... set in your current
+environment, the options can be shortened to just --env CMAC\_URL.
+That will copy the current value of that var into the container's
+environment.
 
 Because we mapped /home/centos/pyreader on the host computer to
 /usr/share/pyreader in the container, when the command runs in the

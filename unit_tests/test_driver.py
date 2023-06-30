@@ -9,7 +9,7 @@ class DriverTests(unittest.TestCase):
 
     def test_load_config(self):
         driver.load_config(1)
-        self.assertEqual(driver.bes_conf, "./bes.conf")
+        self.assertEqual(driver.bes_conf, "bes.conf")
         self.assertEqual(driver.s3_url, "https://s3-module-test-bucket.s3.us-west-2.amazonaws.com/")
 
     def test_read_prefix_config(self):
