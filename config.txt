@@ -4,7 +4,8 @@ path_build = /home/slloyd/git/hyrax_cmake/build/bin
 path_deps = /home/slloyd/git/hyrax_cmake/build/deps/bin
 
 [besconf]
-path = ./bes.conf
+dir = ./
+path = bes.conf
 
 [s3url]
 url = https://s3-module-test-bucket.s3.us-west-2.amazonaws.com/
