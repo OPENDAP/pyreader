@@ -2,13 +2,13 @@
 <module type="CPP_MODULE" version="4">
   <component name="FacetManager">
     <facet type="Python" name="Python facet">
-      <configuration sdkName="Python 3.10 (pyreader)" />
+      <configuration sdkName="py310" />
     </facet>
   </component>
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Python 3.10 (pyreader) interpreter library" level="application" />
+    <orderEntry type="library" name="py310 interpreter library" level="application" />
   </component>
 </module>
