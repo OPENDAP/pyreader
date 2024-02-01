@@ -97,7 +97,6 @@ def read_prefix_config():
     for prefix in raw_prefixes:
         count += 1
         prefixes.append(prefix.strip())
-        # print("Line {}: {}".format(count, prefix.strip()))
 
     return prefixes
 
@@ -125,8 +124,7 @@ def check_data_file(tr):
                 tr.code = 500
                 msg = match.group(1).strip()
                 tr.message = msg
-                # print(msg)
-                subpattern = "HTTP status of (\d{3}) which means (.*)"
+                subpattern = "HTTP status of (\\d{3}) which means (.*)"
                 submatch = re.search(subpattern, msg)
                 if submatch:
                     tr.code = submatch.group(1)
@@ -172,7 +170,7 @@ def call_s3_reader(filename, bescmd_filename, prefix):
                                          "--env", f"CMAC_ACCESS_KEY",
                                          "--env", f"CMAC_ID",
                                          "besd", "besstandalone",
-                                         f"--config={src_dir + bes_conf}",
+                                         # f"--config={src_dir + bes_conf}", # removed jan 2024, moved to site.conf file
                                          f"--inputfile={src_dir + bescmd_filename}"],
                                         stdout=datafile, stderr=logfile)
             if run_result.returncode != 0:

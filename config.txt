@@ -1,11 +1,20 @@
 
 [besstandalone]
-path_build = /home/slloyd/git/hyrax_cmake/build/bin
-path_deps = /home/slloyd/git/hyrax_cmake/build/deps/bin
+path_build = /home/slloyd/git/hyrax/build/bin
+path_deps = /home/slloyd/git/hyrax/build/deps/bin
+
+[rocky_besstandalone]
+ // replace values in besstandalone with ones below
+path_build = /usr/bin/
+path_deps = /usr/deps/bin
 
 [besconf]
 dir = ./
 path = bes.conf
+
+[rocky_besconf]
+ // replace values in besconf with ones below
+dir = /usr/share/pyreader
 
 [s3url]
 url = https://s3-module-test-bucket.s3.us-west-2.amazonaws.com/
